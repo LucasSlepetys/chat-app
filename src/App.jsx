@@ -24,6 +24,7 @@ const App = () => {
     },
     {
       element: <PrivateRouter />,
+      path: '/',
       children: [
         {
           path: 'home',

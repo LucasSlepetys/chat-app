@@ -41,7 +41,12 @@ const AuthContext = ({ children }) => {
 
   const signInUser = useCallback(
     () => async (userInfo) => {
-      const { name = null, email = null, uid = null } = userInfo;
+      const {
+        name = null,
+        email = null,
+        uid = null,
+        photoID = null,
+      } = userInfo;
       try {
         //gets all values from userInfo
         //if a value isn't pass on userInfo it becomes null as default
@@ -49,6 +54,7 @@ const AuthContext = ({ children }) => {
           name: name,
           email: email,
           uid: uid,
+          photoID: photoID,
           allowedRooms: [],
         };
         const userRef = doc(db, 'users', uid);
