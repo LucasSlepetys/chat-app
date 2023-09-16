@@ -6,7 +6,7 @@ import {
   createBrowserRouter,
 } from 'react-router-dom';
 import Authentication from './pages/Authentication';
-import Home from './pages/Home';
+import Home, { loader as homeLoader } from './pages/Home';
 import UserInfo from './pages/userInfo';
 import PrivateRouter from './privateRouter/PrivateRouter';
 
@@ -29,6 +29,7 @@ const App = () => {
         {
           path: 'home',
           element: user?.name ? <Home /> : <UserInfo />,
+          loader: homeLoader(user?.photoID),
         },
       ],
     },

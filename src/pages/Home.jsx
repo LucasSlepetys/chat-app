@@ -1,8 +1,28 @@
 import React from 'react';
 import { useAuthContext } from '../context/AuthContext';
 import { FaArrowCircleRight } from 'react-icons/fa';
+import { useLoaderData } from 'react-router-dom';
+import { storage } from '../firebase/FirebaseConfig';
+import { getDownloadURL, ref } from 'firebase/storage';
+import { BsPersonCircle } from 'react-icons/bs';
+
+export const loader = (photoID) => {
+  return async () => {
+    try {
+      const imgRef = ref(storage, `usersImgs/${photoID}`);
+      const img = await getDownloadURL(imgRef);
+      return { img };
+    } catch (error) {
+      console.log(error);
+      console.log(error.message);
+      return { error: error.message };
+    }
+  };
+};
 
 const Home = () => {
+  const { img, error } = useLoaderData();
+
   const { logOut } = useAuthContext();
   const { user } = useAuthContext();
 
@@ -18,7 +38,21 @@ const Home = () => {
 
   return (
     <div className='h-screen relative flex flex-col justify-center items-center gap-20'>
-      <div className='absolute top-5 left-5'>
+      <div
+        onClick={logOut}
+        className='absolute top-5 left-5 inline-flex justify-center items-center gap-4'
+      >
+        <div className='block relative rounded-full shadow-2xl'>
+          {error ? (
+            <BsPersonCircle className='object-cover w-10 h-10 rounded-full custom-position shadow-2xl' />
+          ) : (
+            <img
+              src={img}
+              alt=''
+              className='object-cover w-14 h-14 rounded-full custom-position shadow-2xl'
+            />
+          )}
+        </div>
         <p className='text-slate-800 text-2xl tracking-widest'>
           Hello {user.name}!
         </p>
@@ -41,7 +75,7 @@ const Home = () => {
       <form onSubmit={handleSubmit}>
         <button
           type='submit'
-          className='inline-flex justify-between w-full items-center my-4 text-xl rounded-2xl bg-green-200 p-2'
+          className='inline-flex justify-between w-full items-center my-8 text-xl rounded-full bg-green-200 py-2 px-4'
         >
           Enter Private Room <FaArrowCircleRight className='text-4xl ml-2' />
         </button>
