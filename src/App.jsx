@@ -9,6 +9,7 @@ import Authentication from './pages/Authentication';
 import Home, { loader as homeLoader } from './pages/Home';
 import UserInfo from './pages/userInfo';
 import PrivateRouter from './privateRouter/PrivateRouter';
+import Room, { loader as roomLoader } from './pages/Room';
 
 const App = () => {
   const { user } = useAuthContext();
@@ -30,6 +31,11 @@ const App = () => {
           path: 'home',
           element: user?.name ? <Home /> : <UserInfo />,
           loader: homeLoader(user?.photoID),
+        },
+        {
+          path: 'room/:id',
+          element: <Room />,
+          loader: roomLoader,
         },
       ],
     },
