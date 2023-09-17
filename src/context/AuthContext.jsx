@@ -6,7 +6,8 @@ import {
   useMemo,
   useState,
 } from 'react';
-import { db } from '../firebase/FirebaseConfig';
+import { auth, db } from '../firebase/FirebaseConfig';
+import { signOut } from 'firebase/auth';
 
 const GlobalContext = createContext();
 
@@ -74,6 +75,7 @@ const AuthContext = ({ children }) => {
 
   const logOut = () => {
     try {
+      signOut(auth);
       setUser(null);
       localStorage.clear();
     } catch (err) {
