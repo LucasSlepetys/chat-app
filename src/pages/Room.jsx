@@ -1,6 +1,7 @@
+import { NavBar } from './../components/NavBar';
 import { TextMessage } from './../components/TextMessage';
 import React, { useEffect, useRef, useState } from 'react';
-import { useLoaderData, useNavigate } from 'react-router-dom';
+import { useLoaderData } from 'react-router-dom';
 import { AiOutlineSend } from 'react-icons/ai';
 import {
   Timestamp,
@@ -8,15 +9,12 @@ import {
   doc,
   getDoc,
   onSnapshot,
-  query,
-  setDoc,
   updateDoc,
 } from 'firebase/firestore';
 import { db } from '../firebase/FirebaseConfig';
 import { useAuthContext } from '../context/AuthContext';
 import { nanoid } from 'nanoid';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
-import { FaArrowAltCircleLeft } from 'react-icons/fa';
 
 export const loader = async ({ params }) => {
   const roomID = params.id;
@@ -39,7 +37,6 @@ const Room = () => {
   const { roomID, messagesLoader = [], roomName } = useLoaderData();
   const [messages, setMessages] = useState(messagesLoader);
   const messageRef = useRef(null);
-  const navigate = useNavigate();
   const { user } = useAuthContext();
 
   useEffect(() => {
@@ -70,6 +67,7 @@ const Room = () => {
           order: nextOrderUsingLength,
         }),
       });
+      window.scrollTo(0, document.body.scrollHeight);
       messageRef.current.value = '';
     } catch (error) {
       console.log(error);
@@ -111,28 +109,19 @@ const Room = () => {
   };
 
   return (
-    <div className='h-screen relative bg-slate-700 overflow-hidden'>
-      <div className='w-full bg-purple-200 p-6 flex items-center gap-4'>
-        <FaArrowAltCircleLeft
-          className='w-10 h-10 text-black'
-          onClick={() => navigate(-1)}
-        />
-        <p className='text-lg tracking-wider'>{roomName}</p>
-        <p className='text-lg tracking-wider'>
-          {roomID !== 'c15Gg1C7BqnHls37RsXI' ? `| ID: ${roomID}` : ''}
-        </p>
-      </div>
-      <div className='h-screen pb-40 overflow-y-scroll'>
-        <DragDropContext onDragEnd={handleDrag}>
-          <Droppable droppableId='ROOT' type='group'>
-            {(provided) => (
-              <div
-                {...provided.droppableProps}
-                ref={provided.innerRef}
-                className='w-11/12 max-w-3xl mx-auto flex flex-col py-8'
-              >
-                {messages.map((message, index) => {
-                  return (
+    <div className='bg-sky-950'>
+      <div className='relative h-screen overflow-y-scroll no-scrollbar no-scrollbar::-webkit-scrollbar'>
+        <NavBar roomName={roomName} roomID={roomID} />
+        <div className='mb-16 py-10'>
+          <DragDropContext onDragEnd={handleDrag}>
+            <Droppable droppableId='ROOT' type='group'>
+              {(provided) => (
+                <div
+                  {...provided.droppableProps}
+                  ref={provided.innerRef}
+                  className='sm:w-11/12 max-w-6xl mx-auto flex flex-col py-4 '
+                >
+                  {messages?.map((message, index) => (
                     <Draggable
                       draggableId={message.id}
                       key={message.id}
@@ -142,25 +131,27 @@ const Room = () => {
                         <TextMessage provided={provided} {...message} />
                       )}
                     </Draggable>
-                  );
-                })}
-              </div>
-            )}
-          </Droppable>
-        </DragDropContext>
-      </div>
-      <div className='w-full absolute bottom-0 padding-4 rounded-xl bg-white color-black flex justify-between items-center'>
-        <input
-          type='text'
-          ref={messageRef}
-          placeholder='Send New Message'
-          onKeyDown={handleKeyDown}
-          className='w-full m-2 p-2 border-transparent outline-none focus:border-transparent focus:ring-0'
-        />
-        <AiOutlineSend
-          className='m-4 text-4xl rounded-full text-black'
-          onClick={handleSubmit}
-        />
+                  ))}
+                </div>
+              )}
+            </Droppable>
+          </DragDropContext>
+        </div>
+        <div className='w-full fixed h-16 bottom-0 bg-white border-t border-gray-200 '>
+          <div className='flex justify-between items-center mx-4'>
+            <input
+              type='text'
+              ref={messageRef}
+              placeholder='Send New Message'
+              onKeyDown={handleKeyDown}
+              className='w-full p-4 text-xl rounded outline-none'
+            />
+            <AiOutlineSend
+              className='text-3xl text-blue-500 cursor-pointer'
+              onClick={handleSubmit}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );

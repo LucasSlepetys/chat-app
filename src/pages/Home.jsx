@@ -2,9 +2,11 @@ import React from 'react';
 import { useAuthContext } from '../context/AuthContext';
 import { FaArrowCircleRight } from 'react-icons/fa';
 import { Navigate, useLoaderData, useNavigate } from 'react-router-dom';
-import { storage } from '../firebase/FirebaseConfig';
+import { db, storage } from '../firebase/FirebaseConfig';
 import { getDownloadURL, ref } from 'firebase/storage';
 import { BsPersonCircle } from 'react-icons/bs';
+import { doc, setDoc } from 'firebase/firestore';
+import { nanoid } from 'nanoid';
 
 export const loader = (photoID) => {
   return async () => {
@@ -33,11 +35,25 @@ const Home = () => {
     const data = Object.fromEntries(formData);
 
     const roomNum = data.roomNum;
-    console.log(roomNum);
+    navigate(`room/${roomNum}`);
+  };
+
+  const createPrivateRoom = async () => {
+    try {
+      const roomID = nanoid();
+      const newRoomDoc = doc(db, 'rooms', roomID);
+      await setDoc(newRoomDoc, {
+        roomID: roomID,
+        roomName: 'Private Room',
+      });
+      navigate(`room/${roomID}`);
+    } catch (err) {
+      console.log(err.message);
+    }
   };
 
   return (
-    <div className='h-screen relative flex flex-col justify-center items-center gap-20'>
+    <div className='h-screen bg-sky-950 relative flex flex-col justify-center items-center gap-20'>
       <div
         onClick={logOut}
         className='absolute top-5 left-5 inline-flex justify-center items-center gap-4'
@@ -53,7 +69,7 @@ const Home = () => {
             />
           )}
         </div>
-        <p className='text-slate-800 text-2xl tracking-widest'>
+        <p className='text-white text-2xl tracking-widest capitalize'>
           Hello {user.name}!
         </p>
       </div>
@@ -61,35 +77,40 @@ const Home = () => {
         <button
           type='button'
           onClick={() => navigate('/room/c15Gg1C7BqnHls37RsXI')}
-          className='text-white shadow-md bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-xl px-5 py-2.5 text-center inline-flex items-center '
+          className='text-white font-bold text-2xl shadow-3xl bg-sky-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300  rounded-lg  px-5 py-2.5 text-center inline-flex justify-center items-center '
         >
           Go to public room
-          <FaArrowCircleRight className='text-2xl ml-2' />
+          <FaArrowCircleRight className='text-3xl ml-6' />
         </button>
         <button
           type='button'
-          className='text-white shadow-md bg-orange-700 hover:bg-orange-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-xl px-5 py-2.5 text-center '
+          onClick={createPrivateRoom}
+          className='text-sky-950 font-bold shadow-3xl bg-sky-300 hover:bg-sky-200 focus:ring-4 focus:outline-none focus:ring-blue-300  rounded-lg text-2xl px-5 py-2.5 text-center '
         >
           Create private room
         </button>
       </div>
       <form onSubmit={handleSubmit}>
-        <button
-          type='submit'
-          className='inline-flex justify-between w-full items-center my-8 text-xl rounded-full bg-green-200 py-2 px-4'
-        >
-          Enter Private Room <FaArrowCircleRight className='text-4xl ml-2' />
-        </button>
-        <div className='flex justify-center items-center gap-2 border-b-2 border-black'>
-          <p className='text-black text-xl text-left '>Room #</p>
+        <label htmlFor='roomNum' className='text-white text-2xl'>
+          Enter in a private room
+        </label>
+        <div className='flex justify-center items-center gap-2 bg-sky-300 p-4 mt-4'>
+          <p className='text-sky-950 text-xl text-left '>Room #</p>
           <input
-            type='number'
+            type='text'
             name='roomNum'
+            id='roomNum'
             placeholder='Enter room number'
-            className='text-xl outline-none text-slate-700 tracking-wider	'
+            className='text-xl outline-none text-slate-700 tracking-wider	bg-transparent remove-arrow'
             required
           />
         </div>
+        <button
+          type='submit'
+          className='text-white inline-flex tracking-wider justify-between w-full items-center my-10 text-xl rounded-3xl bg-green-800 py-3 px-6 shadow-2xl font-bold'
+        >
+          Enter Room <FaArrowCircleRight className='text-4xl ml-2' />
+        </button>
       </form>
     </div>
   );

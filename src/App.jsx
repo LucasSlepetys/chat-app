@@ -17,7 +17,7 @@ const App = () => {
   const router = createBrowserRouter([
     {
       path: 'authentication',
-      element: user ? <Navigate to='/home' /> : <Authentication />,
+      element: user ? <Navigate to='/' /> : <Authentication />,
     },
     {
       path: 'userInfo',
@@ -25,10 +25,9 @@ const App = () => {
     },
     {
       element: <PrivateRouter />,
-      path: '/',
       children: [
         {
-          path: 'home',
+          index: true,
           element: user?.name ? <Home /> : <UserInfo />,
           loader: homeLoader(user?.photoID),
         },
