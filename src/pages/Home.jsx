@@ -25,7 +25,7 @@ export const loader = (photoID) => {
 const Home = () => {
   const { img, error } = useLoaderData();
   const { logOut } = useAuthContext();
-  const { user } = useAuthContext();
+  const { user, addNewRoom } = useAuthContext();
   const navigate = useNavigate();
 
   const handleSubmit = (e) => {
@@ -40,12 +40,7 @@ const Home = () => {
 
   const createPrivateRoom = async () => {
     try {
-      const roomID = nanoid();
-      const newRoomDoc = doc(db, 'rooms', roomID);
-      await setDoc(newRoomDoc, {
-        roomID: roomID,
-        roomName: 'Private Room',
-      });
+      const roomID = await addNewRoom()();
       navigate(`room/${roomID}`);
     } catch (err) {
       console.log(err.message);

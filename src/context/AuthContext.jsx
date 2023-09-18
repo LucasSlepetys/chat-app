@@ -1,4 +1,4 @@
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { arrayUnion, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import {
   createContext,
   useCallback,
@@ -8,6 +8,7 @@ import {
 } from 'react';
 import { auth, db } from '../firebase/FirebaseConfig';
 import { signOut } from 'firebase/auth';
+import { nanoid } from 'nanoid';
 
 const GlobalContext = createContext();
 
@@ -83,12 +84,37 @@ const AuthContext = ({ children }) => {
     }
   };
 
+  const addNewRoom = useCallback(
+    () => async () => {
+      try {
+        const roomID = nanoid();
+        const newRoomDoc = doc(db, 'rooms', roomID);
+        await setDoc(newRoomDoc, {
+          roomID: roomID,
+          roomName: 'Private Room',
+        });
+
+        const userDoc = doc(db, 'users', user.uid);
+        await updateDoc(userDoc, {
+          allowedRooms: arrayUnion(roomID),
+        });
+
+        return roomID;
+      } catch (err) {
+        console.log(err.message);
+        return '';
+      }
+    },
+    []
+  );
+
   const values = {
     user,
     error,
     loginUser,
     signInUser,
     logOut,
+    addNewRoom,
   };
 
   return (
