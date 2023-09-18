@@ -1,12 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuthContext } from '../context/AuthContext';
-import { FaArrowCircleRight } from 'react-icons/fa';
+import { FaArrowCircleRight, FaBars } from 'react-icons/fa';
 import { Navigate, useLoaderData, useNavigate } from 'react-router-dom';
 import { db, storage } from '../firebase/FirebaseConfig';
 import { getDownloadURL, ref } from 'firebase/storage';
 import { BsPersonCircle } from 'react-icons/bs';
 import { doc, setDoc } from 'firebase/firestore';
 import { nanoid } from 'nanoid';
+import RoomsPopUpDisplay from '../components/RoomsPopUpDisplay';
 
 export const loader = (photoID) => {
   return async () => {
@@ -23,10 +24,15 @@ export const loader = (photoID) => {
 };
 
 const Home = () => {
+  const [showRooms, setShowRooms] = useState(true);
   const { img, error } = useLoaderData();
   const { logOut } = useAuthContext();
   const { user, addNewRoom } = useAuthContext();
   const navigate = useNavigate();
+
+  const toggleShowRooms = () => {
+    setShowRooms(!showRooms);
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -49,24 +55,30 @@ const Home = () => {
 
   return (
     <div className='h-screen bg-sky-950 relative flex flex-col justify-center items-center gap-20'>
+      <RoomsPopUpDisplay showRooms={showRooms} />
       <div
-        onClick={logOut}
-        className='absolute top-5 left-5 inline-flex justify-center items-center gap-4'
+        // onClick={logOut}
+        className='absolute top-0 left-0 w-full inline-flex items-center justify-between gap-4 p-4'
       >
-        <div className='block relative rounded-full shadow-2xl'>
-          {error ? (
-            <BsPersonCircle className='object-cover w-10 h-10 rounded-full custom-position shadow-2xl' />
-          ) : (
-            <img
-              src={img}
-              alt=''
-              className='object-cover w-14 h-14 rounded-full custom-position shadow-2xl'
-            />
-          )}
+        <div className='flex gap-6 items-center'>
+          <div className=' relative rounded-full shadow-2xl'>
+            {error ? (
+              <BsPersonCircle className='object-cover w-10 h-10 rounded-full custom-position shadow-2xl' />
+            ) : (
+              <img
+                src={img}
+                alt=''
+                className='object-cover w-14 h-14 rounded-full custom-position shadow-2xl'
+              />
+            )}
+          </div>
+          <p className='text-white text-2xl tracking-widest capitalize'>
+            Hello {user.name}!
+          </p>
         </div>
-        <p className='text-white text-2xl tracking-widest capitalize'>
-          Hello {user.name}!
-        </p>
+        <div>
+          <FaBars onClick={toggleShowRooms} className='text-white text-2xl' />
+        </div>
       </div>
       <div className='flex flex-col gap-4'>
         <button
