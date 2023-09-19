@@ -6,7 +6,7 @@ import {
   createBrowserRouter,
 } from 'react-router-dom';
 import Authentication from './pages/Authentication';
-import Home, { loader as homeLoader } from './pages/Home';
+import Home from './pages/Home';
 import UserInfo from './pages/userInfo';
 import PrivateRouter from './privateRouter/PrivateRouter';
 import Room, { loader as roomLoader } from './pages/Room';
@@ -37,7 +37,6 @@ const App = () => {
           index: true,
           element: user?.name ? <Home /> : <UserInfo />,
           errorElement: <Error />,
-          loader: homeLoader(user?.photoID),
         },
         {
           path: 'room/:id',

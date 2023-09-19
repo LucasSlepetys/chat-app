@@ -24,8 +24,8 @@ export const loader = async ({ params }) => {
     const roomDocRef = doc(db, 'rooms', roomID);
     const snapshot = await getDoc(roomDocRef);
 
-    const roomName = snapshot.data().roomName;
-    const messagesLoader = snapshot.data().messages;
+    const roomName = await snapshot.data().roomName;
+    const messagesLoader = await snapshot.data().messages;
 
     return { messagesLoader, roomID, roomName };
   } catch (error) {

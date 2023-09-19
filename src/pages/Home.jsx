@@ -1,39 +1,18 @@
-import React, { useState } from 'react';
+import { HomeNavBar } from './../components/HomeNavBar';
+import React, { useEffect, useState } from 'react';
 import { useAuthContext } from '../context/AuthContext';
-import { FaArrowCircleRight, FaBars } from 'react-icons/fa';
-import {
-  Navigate,
-  useLoaderData,
-  useNavigate,
-  useNavigation,
-} from 'react-router-dom';
-import { db, storage } from '../firebase/FirebaseConfig';
-import { getDownloadURL, ref } from 'firebase/storage';
-import { BsPersonCircle } from 'react-icons/bs';
-import { doc, setDoc } from 'firebase/firestore';
-import { nanoid } from 'nanoid';
+import { FaArrowCircleRight } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 import RoomsPopUpDisplay from '../components/RoomsPopUpDisplay';
-import LoaderAnimation from '../components/LoaderAnimation';
-
-export const loader = (photoID) => {
-  return async () => {
-    try {
-      const imgRef = ref(storage, `usersImgs/${photoID}`);
-      const img = await getDownloadURL(imgRef);
-      return { img };
-    } catch (error) {
-      console.log(error);
-      console.log(error.message);
-      return { error: error.message };
-    }
-  };
-};
 
 const Home = () => {
   const [showRooms, setShowRooms] = useState(false);
-  const { img, error } = useLoaderData();
-  const { user, addNewRoom, joinPrivateRoom } = useAuthContext();
+  const { addNewRoom, joinPrivateRoom, setUserLocal } = useAuthContext();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    setUserLocal();
+  }, []);
 
   const toggleShowRooms = () => {
     setShowRooms(!showRooms);
@@ -64,35 +43,7 @@ const Home = () => {
   return (
     <div className='h-screen bg-sky-950 relative flex flex-col justify-center items-center gap-20'>
       <RoomsPopUpDisplay showRooms={showRooms} />
-      <div
-        // onClick={logOut}
-        className='absolute top-0 left-0 w-full inline-flex items-center justify-between gap-4 p-4'
-      >
-        <div className='flex gap-6 items-center'>
-          <div className=' relative rounded-full shadow-2xl'>
-            {error ? (
-              <BsPersonCircle className='object-cover w-10 h-10 rounded-full custom-position shadow-2xl' />
-            ) : (
-              <img
-                src={img}
-                alt=''
-                className='object-cover w-14 h-14 rounded-full custom-position shadow-2xl'
-              />
-            )}
-          </div>
-          <p className='text-white text-2xl tracking-widest capitalize'>
-            Hello {user.name}!
-          </p>
-        </div>
-        <div>
-          <FaBars
-            onClick={toggleShowRooms}
-            className={`text-white text-2xl sm:text-3xl ${
-              showRooms ? '' : 'animate-bounce'
-            } temporary-bounce`}
-          />
-        </div>
-      </div>
+      <HomeNavBar toggleShowRooms={toggleShowRooms} showRooms={showRooms} />
       <div className='flex flex-col gap-4'>
         <button
           type='button'

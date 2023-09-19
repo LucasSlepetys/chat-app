@@ -1,6 +1,6 @@
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { auth, db } from '../firebase/FirebaseConfig';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, onSnapshot } from 'firebase/firestore';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuthContext } from '../context/AuthContext';
 import { FcGoogle } from 'react-icons/fc';
@@ -22,24 +22,26 @@ const Authentication = () => {
       //-------------------------
 
       const userRef = doc(db, 'users', userUID);
-      const docSnapshot = await getDoc(userRef);
+
+      const docSnapshot = onSnapshot(userRef, (snapshot) => {
+        if (snapshot.exists()) {
+          loginUser()(userUID);
+          if (!error) {
+            navigate('/', { replace: true });
+          } else {
+            console.log(error);
+          }
+        } else {
+          signInUser()({ email: userEmail, uid: userUID });
+          if (!error) {
+            navigate('/userInfo');
+          } else {
+            console.log(error);
+          }
+        }
+      });
 
       //checks if document exits and logins or signin user accordinly
-      if (docSnapshot.exists()) {
-        await loginUser()(userUID);
-        if (!error) {
-          navigate('/', { replace: true });
-        } else {
-          console.log(error);
-        }
-      } else {
-        await signInUser()({ email: userEmail, uid: userUID });
-        if (!error) {
-          navigate('/userInfo');
-        } else {
-          console.log(error);
-        }
-      }
     } catch (error) {
       // Handle Errors here.
       const errorCode = error.code;

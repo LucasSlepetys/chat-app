@@ -32,23 +32,51 @@ const AuthContext = ({ children }) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentuser) => {
-      if (!currentuser) {
+    console.log(user);
+  }, [user]);
+
+  useEffect(() => {
+    console.log('user:' + user);
+    const unsubscribe = onAuthStateChanged(auth, async (currentuser) => {
+      if (currentuser) {
+        await updateLocalUser(currentuser.uid);
+      } else {
         logOut();
       }
     });
+
+    setUserLocal();
 
     return () => {
       unsubscribe();
     };
   }, []);
 
+  //!most I SHOULD NOT USE IT solution
+  const setUserLocal = () => {
+    const userStorage = JSON.parse(localStorage.getItem('user') || null);
+    setUser(userStorage);
+  };
+
+  const updateLocalUser = async (uid) => {
+    const docSnapshot = onSnapshot(doc(db, 'users', uid), (snapshot) => {
+      try {
+        const userData = snapshot.data();
+        //updates user data in local storage
+        localStorage.setItem('user', JSON.stringify(userData));
+        // setUser(userData);
+      } catch (err) {
+        console.log(err.message);
+      }
+    });
+  };
+
   const loginUser = useCallback(
     () => async (uid) => {
       try {
         const userRef = doc(db, 'users', uid);
         const docSnapshot = onSnapshot(userRef, (snapshot) => {
-          const userData = { ...snapshot.data(), allowedRooms: [] };
+          const userData = snapshot.data();
           //updates user data in local useState
           setUser(userData);
           //updates user data in local storage
@@ -119,7 +147,7 @@ const AuthContext = ({ children }) => {
         await updateDoc(userDoc, {
           allowedRooms: arrayUnion(roomID),
         });
-
+        updateLocalUser();
         return roomID;
       } catch (err) {
         console.log(err.message);
@@ -136,6 +164,7 @@ const AuthContext = ({ children }) => {
         await updateDoc(userDoc, {
           allowedRooms: arrayUnion(roomID),
         });
+        updateLocalUser();
         return null;
       } catch (error) {
         console.log(err.message);
@@ -152,6 +181,7 @@ const AuthContext = ({ children }) => {
     logOut,
     addNewRoom,
     joinPrivateRoom,
+    setUserLocal,
   };
 
   return (

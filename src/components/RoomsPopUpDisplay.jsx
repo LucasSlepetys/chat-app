@@ -5,24 +5,7 @@ import { doc, getDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase/FirebaseConfig';
 
 const RoomsPopUpDisplay = ({ showRooms }) => {
-  const [listOfRooms, setListOfRooms] = useState([]);
   const { user, logOut } = useAuthContext();
-  const getAllRooms = async () => {
-    try {
-      const userDocRef = doc(db, 'users', user.uid);
-      const docSnapshot = onSnapshot(userDocRef, (snapshot) => {
-        const listOfRooms = snapshot.data().allowedRooms;
-        console.log(listOfRooms);
-        setListOfRooms(listOfRooms);
-      });
-    } catch (err) {
-      console.log(err.message);
-    }
-  };
-
-  useEffect(() => {
-    getAllRooms();
-  }, []);
 
   return (
     <div
@@ -35,7 +18,7 @@ const RoomsPopUpDisplay = ({ showRooms }) => {
       </p>
 
       <div className='flex flex-col justify-center items-center sm:w-10/12 gap-4'>
-        {listOfRooms?.map((room) => {
+        {user.allowedRooms?.map((room) => {
           return <RoomBtn key={room} room={room} />;
         })}
       </div>
