@@ -25,51 +25,14 @@ export const useAuthContext = () => {
   return useContext(GlobalContext);
 };
 
+const userStorage = JSON.parse(localStorage.getItem('user') || null);
+
 const AuthContext = ({ children }) => {
+  console.log('user Storage');
+  console.log(userStorage);
   //if local storage does not contain key of user return null
-  const userStorage = JSON.parse(localStorage.getItem('user') || null);
   const [user, setUser] = useState(userStorage);
   const [error, setError] = useState(null);
-
-  useEffect(() => {
-    console.log(user);
-  }, [user]);
-
-  useEffect(() => {
-    console.log('user:' + user);
-    const unsubscribe = onAuthStateChanged(auth, async (currentuser) => {
-      if (currentuser) {
-        await updateLocalUser(currentuser.uid);
-      } else {
-        logOut();
-      }
-    });
-
-    setUserLocal();
-
-    return () => {
-      unsubscribe();
-    };
-  }, []);
-
-  //!most I SHOULD NOT USE IT solution
-  const setUserLocal = () => {
-    const userStorage = JSON.parse(localStorage.getItem('user') || null);
-    setUser(userStorage);
-  };
-
-  const updateLocalUser = async (uid) => {
-    const docSnapshot = onSnapshot(doc(db, 'users', uid), (snapshot) => {
-      try {
-        const userData = snapshot.data();
-        //updates user data in local storage
-        localStorage.setItem('user', JSON.stringify(userData));
-        // setUser(userData);
-      } catch (err) {
-        console.log(err.message);
-      }
-    });
-  };
 
   const loginUser = useCallback(
     () => async (uid) => {
@@ -77,11 +40,14 @@ const AuthContext = ({ children }) => {
         const userRef = doc(db, 'users', uid);
         const docSnapshot = onSnapshot(userRef, (snapshot) => {
           const userData = snapshot.data();
+          console.log('user data:');
+          console.log(userData);
           //updates user data in local useState
           setUser(userData);
           //updates user data in local storage
           localStorage.setItem('user', JSON.stringify(userData));
           setError(null);
+          console.log('update has happened');
         });
       } catch (err) {
         setError(err.message);
@@ -135,7 +101,9 @@ const AuthContext = ({ children }) => {
 
   const addNewRoom = useCallback(
     () => async () => {
+      console.log(user);
       try {
+        //new room's id:
         const roomID = nanoid();
         const newRoomDoc = doc(db, 'rooms', roomID);
         await setDoc(newRoomDoc, {
@@ -144,10 +112,23 @@ const AuthContext = ({ children }) => {
         });
 
         const userDoc = doc(db, 'users', user.uid);
+        //Adds new roomID to allowedRooms array in firebase
+        //What must also do:
+        //Add same information to local storage and to user state
         await updateDoc(userDoc, {
           allowedRooms: arrayUnion(roomID),
         });
-        updateLocalUser();
+        //New Data for the local storage and user state:
+        const newAllowedRoom = user.allowedRooms;
+        newAllowedRoom.push(roomID);
+        const newLocalData = {
+          ...user,
+          allowedRooms: newAllowedRoom,
+        };
+        //updates user data in local useState
+        setUser(newLocalData);
+        //updates user data in local storage
+        localStorage.setItem('user', JSON.stringify(newLocalData));
         return roomID;
       } catch (err) {
         console.log(err.message);
@@ -164,7 +145,6 @@ const AuthContext = ({ children }) => {
         await updateDoc(userDoc, {
           allowedRooms: arrayUnion(roomID),
         });
-        updateLocalUser();
         return null;
       } catch (error) {
         console.log(err.message);
@@ -181,7 +161,6 @@ const AuthContext = ({ children }) => {
     logOut,
     addNewRoom,
     joinPrivateRoom,
-    setUserLocal,
   };
 
   return (

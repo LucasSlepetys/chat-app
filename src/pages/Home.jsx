@@ -7,12 +7,8 @@ import RoomsPopUpDisplay from '../components/RoomsPopUpDisplay';
 
 const Home = () => {
   const [showRooms, setShowRooms] = useState(false);
-  const { addNewRoom, joinPrivateRoom, setUserLocal } = useAuthContext();
+  const { addNewRoom, joinPrivateRoom } = useAuthContext();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    setUserLocal();
-  }, []);
 
   const toggleShowRooms = () => {
     setShowRooms(!showRooms);

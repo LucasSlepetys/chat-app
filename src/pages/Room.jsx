@@ -20,23 +20,25 @@ import LoaderAnimation from '../components/LoaderAnimation';
 export const loader = async ({ params }) => {
   const roomID = params.id;
 
-  try {
-    const roomDocRef = doc(db, 'rooms', roomID);
-    const snapshot = await getDoc(roomDocRef);
+  // try {
+  //   const roomDocRef = doc(db, 'rooms', roomID);
+  //   const snapshot = await getDoc(roomDocRef);
 
-    const roomName = await snapshot.data().roomName;
-    const messagesLoader = await snapshot.data().messages;
+  //   const roomName = await snapshot.data().roomName;
+  //   const messagesLoader = await snapshot.data().messages;
 
-    return { messagesLoader, roomID, roomName };
-  } catch (error) {
-    console.log(error);
-    return { roomID, messagesLoader: [], error: error.message, roomName };
-  }
+  //   return { messagesLoader, roomID, roomName };
+  // } catch (error) {
+  //   console.log(error);
+  //   return { roomID, messagesLoader: [], error: error.message, roomName };
+  // }
+  return { roomID };
 };
 
 const Room = () => {
-  const { roomID, messagesLoader = [], roomName } = useLoaderData();
-  const [messages, setMessages] = useState(messagesLoader);
+  const { roomID } = useLoaderData();
+  const roomName = 'Room Name';
+  const [messages, setMessages] = useState([]);
   const messageRef = useRef(null);
   const { user } = useAuthContext();
 
