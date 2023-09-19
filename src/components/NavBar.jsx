@@ -26,7 +26,7 @@ export function NavBar({ roomName, roomID }) {
     <div className='w-full bg-sky-100 p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 text-sky-950 shadow-xl'>
       <div>
         <FaArrowAltCircleLeft
-          className='w-10 h-10 inline mr-8'
+          className='w-10 h-10 inline mr-8 '
           onClick={() => navigate(-1)}
         />
         <input

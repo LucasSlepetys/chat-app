@@ -1,13 +1,21 @@
-import { arrayUnion, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import {
+  arrayUnion,
+  doc,
+  getDoc,
+  onSnapshot,
+  setDoc,
+  updateDoc,
+} from 'firebase/firestore';
 import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from 'react';
 import { auth, db } from '../firebase/FirebaseConfig';
-import { signOut } from 'firebase/auth';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { nanoid } from 'nanoid';
 
 const GlobalContext = createContext();
@@ -23,17 +31,30 @@ const AuthContext = ({ children }) => {
   const [user, setUser] = useState(userStorage);
   const [error, setError] = useState(null);
 
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentuser) => {
+      if (!currentuser) {
+        logOut();
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
   const loginUser = useCallback(
     () => async (uid) => {
       try {
         const userRef = doc(db, 'users', uid);
-        const docSnap = await getDoc(userRef);
-        const userData = { ...docSnap.data(), allowedRooms: [] };
-        //updates user data in local useState
-        setUser(userData);
-        //updates user data in local storage
-        localStorage.setItem('user', JSON.stringify(userData));
-        setError(null);
+        const docSnapshot = onSnapshot(userRef, (snapshot) => {
+          const userData = { ...snapshot.data(), allowedRooms: [] };
+          //updates user data in local useState
+          setUser(userData);
+          //updates user data in local storage
+          localStorage.setItem('user', JSON.stringify(userData));
+          setError(null);
+        });
       } catch (err) {
         setError(err.message);
       }
@@ -108,6 +129,21 @@ const AuthContext = ({ children }) => {
     []
   );
 
+  const joinPrivateRoom = useCallback(
+    () => async (roomID) => {
+      try {
+        const userDoc = doc(db, 'users', user.uid);
+        await updateDoc(userDoc, {
+          allowedRooms: arrayUnion(roomID),
+        });
+        return null;
+      } catch (error) {
+        console.log(err.message);
+      }
+    },
+    []
+  );
+
   const values = {
     user,
     error,
@@ -115,6 +151,7 @@ const AuthContext = ({ children }) => {
     signInUser,
     logOut,
     addNewRoom,
+    joinPrivateRoom,
   };
 
   return (

@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useAuthContext } from '../context/AuthContext';
-import svgg from '../assets/react.svg';
+import defaultUserIcon from '../assets/userIcon.png';
 import { storage } from '../firebase/FirebaseConfig';
 import { getDownloadURL, ref } from 'firebase/storage';
 import { RiDraggable } from 'react-icons/ri';
 
 export function TextMessage({ text, provided, sentBy }) {
-  const [userImg, setUserImg] = useState(svgg);
+  const [userImg, setUserImg] = useState(defaultUserIcon);
   const { user } = useAuthContext();
 
   const getImgFromFirebase = async () => {
@@ -52,11 +52,11 @@ export function TextMessage({ text, provided, sentBy }) {
         }`}
       >
         <RiDraggable
-          className={`inline h-6 w-6  ${
+          className={`inline text-2xl  ${
             sentBy.userUID === user.uid ? 'order-1 ml-4' : 'mr-4'
           }`}
         />
-        <p className='inline sm:text-lg md:text-xl'>{text}</p>
+        <p className='inline text-left sm:text-lg md:text-xl mx-4'>{text}</p>
       </div>
     </div>
   );

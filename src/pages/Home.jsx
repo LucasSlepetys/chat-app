@@ -1,13 +1,19 @@
 import React, { useState } from 'react';
 import { useAuthContext } from '../context/AuthContext';
 import { FaArrowCircleRight, FaBars } from 'react-icons/fa';
-import { Navigate, useLoaderData, useNavigate } from 'react-router-dom';
+import {
+  Navigate,
+  useLoaderData,
+  useNavigate,
+  useNavigation,
+} from 'react-router-dom';
 import { db, storage } from '../firebase/FirebaseConfig';
 import { getDownloadURL, ref } from 'firebase/storage';
 import { BsPersonCircle } from 'react-icons/bs';
 import { doc, setDoc } from 'firebase/firestore';
 import { nanoid } from 'nanoid';
 import RoomsPopUpDisplay from '../components/RoomsPopUpDisplay';
+import LoaderAnimation from '../components/LoaderAnimation';
 
 export const loader = (photoID) => {
   return async () => {
@@ -24,29 +30,31 @@ export const loader = (photoID) => {
 };
 
 const Home = () => {
-  const [showRooms, setShowRooms] = useState(true);
+  const [showRooms, setShowRooms] = useState(false);
   const { img, error } = useLoaderData();
-  const { logOut } = useAuthContext();
-  const { user, addNewRoom } = useAuthContext();
+  const { user, addNewRoom, joinPrivateRoom } = useAuthContext();
   const navigate = useNavigate();
 
   const toggleShowRooms = () => {
     setShowRooms(!showRooms);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const formData = new FormData(e.currentTarget);
     const data = Object.fromEntries(formData);
 
-    const roomNum = data.roomNum;
-    navigate(`room/${roomNum}`);
+    const roomID = data.roomID;
+    joinPrivateRoom()(roomID).then(() => {
+      navigate(`room/${roomID}`);
+    });
   };
 
   const createPrivateRoom = async () => {
     try {
       const roomID = await addNewRoom()();
+      console.log(roomID);
       navigate(`room/${roomID}`);
     } catch (err) {
       console.log(err.message);
@@ -77,7 +85,12 @@ const Home = () => {
           </p>
         </div>
         <div>
-          <FaBars onClick={toggleShowRooms} className='text-white text-2xl' />
+          <FaBars
+            onClick={toggleShowRooms}
+            className={`text-white text-2xl sm:text-3xl ${
+              showRooms ? '' : 'animate-bounce'
+            } temporary-bounce`}
+          />
         </div>
       </div>
       <div className='flex flex-col gap-4'>
@@ -98,15 +111,15 @@ const Home = () => {
         </button>
       </div>
       <form onSubmit={handleSubmit}>
-        <label htmlFor='roomNum' className='text-white text-2xl'>
+        <label htmlFor='roomID' className='text-white text-2xl'>
           Enter in a private room
         </label>
         <div className='flex justify-center items-center gap-2 bg-sky-300 p-4 mt-4'>
           <p className='text-sky-950 text-xl text-left '>Room #</p>
           <input
             type='text'
-            name='roomNum'
-            id='roomNum'
+            name='roomID'
+            id='roomID'
             placeholder='Enter room number'
             className='text-xl outline-none text-slate-700 tracking-wider	bg-transparent remove-arrow'
             required

@@ -16,13 +16,19 @@
         scrollbar-width: none;
         /* Firefox */
     }
+
     .remove-arrow::-webkit-inner-spin-button,
-        .remove-arrow::-webkit-outer-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-  
-        .remove-arrow {
-            -moz-appearance: textfield;
-        }
+    .remove-arrow::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    .remove-arrow {
+        -moz-appearance: textfield;
+    }
+
+    .temporary-bounce {
+        -webkit-animation-iteration-count: 8;
+        animation-iteration-count: 8;
+    }
 }

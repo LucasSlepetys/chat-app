@@ -1,7 +1,7 @@
 import { NavBar } from './../components/NavBar';
 import { TextMessage } from './../components/TextMessage';
 import React, { useEffect, useRef, useState } from 'react';
-import { useLoaderData } from 'react-router-dom';
+import { useLoaderData, useNavigation } from 'react-router-dom';
 import { AiOutlineSend } from 'react-icons/ai';
 import {
   Timestamp,
@@ -15,6 +15,7 @@ import { db } from '../firebase/FirebaseConfig';
 import { useAuthContext } from '../context/AuthContext';
 import { nanoid } from 'nanoid';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
+import LoaderAnimation from '../components/LoaderAnimation';
 
 export const loader = async ({ params }) => {
   const roomID = params.id;
