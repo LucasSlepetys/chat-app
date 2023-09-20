@@ -16,7 +16,7 @@ export function RoomBtn({ room }) {
         setRoomName(roomName);
       });
     } catch (err) {
-      console.log(err.message);
+      console.log('Error in RoomBtn.jsx: ' + err.message);
     }
   };
   useEffect(() => {

@@ -1,21 +1,13 @@
 import {
   arrayUnion,
   doc,
-  getDoc,
   onSnapshot,
   setDoc,
   updateDoc,
 } from 'firebase/firestore';
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import { createContext, useCallback, useContext, useState } from 'react';
 import { auth, db } from '../firebase/FirebaseConfig';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { signOut } from 'firebase/auth';
 import { nanoid } from 'nanoid';
 
 const GlobalContext = createContext();
@@ -25,39 +17,45 @@ export const useAuthContext = () => {
   return useContext(GlobalContext);
 };
 
+//if local storage does not contain key of user return null
 const userStorage = JSON.parse(localStorage.getItem('user') || null);
 
 const AuthContext = ({ children }) => {
-  console.log('user Storage');
+  console.log('-------- user Storage --------');
   console.log(userStorage);
-  //if local storage does not contain key of user return null
+  console.log('-------- user Storage End ---------');
+
   const [user, setUser] = useState(userStorage);
   const [error, setError] = useState(null);
 
   const loginUser = useCallback(
     () => async (uid) => {
+      console.log('--------- Login User Function ------------');
       try {
         const userRef = doc(db, 'users', uid);
         const docSnapshot = onSnapshot(userRef, (snapshot) => {
           const userData = snapshot.data();
-          console.log('user data:');
+          console.log('user data in login:');
           console.log(userData);
-          //updates user data in local useState
-          setUser(userData);
           //updates user data in local storage
           localStorage.setItem('user', JSON.stringify(userData));
+          //updates user data in local useState
+          setUser(userData);
           setError(null);
           console.log('update has happened');
+          console.log(JSON.parse(localStorage.getItem('user') || null));
         });
       } catch (err) {
         setError(err.message);
       }
+      console.log('--------- Login User End ------------');
     },
-    []
+    [user]
   );
 
   const signInUser = useCallback(
     () => async (userInfo) => {
+      console.log('--------- Sign In User ------------');
       const {
         name = null,
         email = null,
@@ -74,6 +72,8 @@ const AuthContext = ({ children }) => {
           photoID: photoID,
           allowedRooms: [],
         };
+        console.log('user data in signin:');
+        console.log(newUserInfo);
         const userRef = doc(db, 'users', uid);
         //updates userRef's data in firestore
         await setDoc(userRef, newUserInfo);
@@ -85,8 +85,9 @@ const AuthContext = ({ children }) => {
       } catch (err) {
         setError(err.message);
       }
+      console.log('--------- Sign In User End ------------');
     },
-    []
+    [user]
   );
 
   const logOut = () => {
@@ -113,8 +114,6 @@ const AuthContext = ({ children }) => {
 
         const userDoc = doc(db, 'users', user.uid);
         //Adds new roomID to allowedRooms array in firebase
-        //What must also do:
-        //Add same information to local storage and to user state
         await updateDoc(userDoc, {
           allowedRooms: arrayUnion(roomID),
         });
@@ -135,22 +134,34 @@ const AuthContext = ({ children }) => {
         return '';
       }
     },
-    []
+    [user]
   );
 
   const joinPrivateRoom = useCallback(
     () => async (roomID) => {
       try {
         const userDoc = doc(db, 'users', user.uid);
+        //adds new private room to allowedRooms array in firebase
         await updateDoc(userDoc, {
           allowedRooms: arrayUnion(roomID),
         });
+        //New Data for the local storage and user state:
+        const newAllowedRoom = user.allowedRooms;
+        newAllowedRoom.push(roomID);
+        const newLocalData = {
+          ...user,
+          allowedRooms: newAllowedRoom,
+        };
+        //updates user data in local useState
+        setUser(newLocalData);
+        //updates user data in local storage
+        localStorage.setItem('user', JSON.stringify(newLocalData));
         return null;
       } catch (error) {
         console.log(err.message);
       }
     },
-    []
+    [user]
   );
 
   const values = {

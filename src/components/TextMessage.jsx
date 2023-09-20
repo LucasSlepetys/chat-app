@@ -15,8 +15,7 @@ export function TextMessage({ text, provided, sentBy }) {
       const img = await getDownloadURL(imgRef);
       setUserImg(img);
     } catch (error) {
-      console.log(error);
-      console.log(error.message);
+      console.log('Error in TextMessage.jsx' + error.message);
     }
   };
 

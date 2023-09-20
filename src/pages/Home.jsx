@@ -7,8 +7,14 @@ import RoomsPopUpDisplay from '../components/RoomsPopUpDisplay';
 
 const Home = () => {
   const [showRooms, setShowRooms] = useState(false);
-  const { addNewRoom, joinPrivateRoom } = useAuthContext();
+  const { addNewRoom, joinPrivateRoom, user } = useAuthContext();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    console.log('home -------');
+    console.log(user);
+    console.log('home end -------');
+  }, []);
 
   const toggleShowRooms = () => {
     setShowRooms(!showRooms);
@@ -21,18 +27,16 @@ const Home = () => {
     const data = Object.fromEntries(formData);
 
     const roomID = data.roomID;
-    joinPrivateRoom()(roomID).then(() => {
-      navigate(`room/${roomID}`);
-    });
+    await joinPrivateRoom()(roomID);
+    navigate(`room/${roomID}`);
   };
 
   const createPrivateRoom = async () => {
     try {
       const roomID = await addNewRoom()();
-      console.log(roomID);
       navigate(`room/${roomID}`);
     } catch (err) {
-      console.log(err.message);
+      console.log('Error in Home.jsx ' + err.message);
     }
   };
 

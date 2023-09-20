@@ -13,10 +13,9 @@ export function HomeNavBar({ toggleShowRooms, showRooms }) {
     try {
       const imgRef = ref(storage, `usersImgs/${user.photoID}`);
       const img = await getDownloadURL(imgRef);
-      console.log(img);
       setUserImg(img);
     } catch (error) {
-      console.log(error.message);
+      console.log('Error in HomeNavBar.jsx: ' + error.message);
     }
   };
 

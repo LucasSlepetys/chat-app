@@ -87,20 +87,17 @@ const Room = () => {
     )
       return;
 
-    console.log(results);
-
     if (type === 'group') {
       try {
         const reorderedMessages = [...messages];
         const [removedMessage] = reorderedMessages.splice(source.index, 1);
-        console.log(removedMessage);
         reorderedMessages.splice(destination.index, 0, removedMessage);
         const roomDocRef = doc(db, 'rooms', roomID);
         await updateDoc(roomDocRef, {
           messages: reorderedMessages,
         });
       } catch (error) {
-        console.log(error.message);
+        console.log('Error in Room in if type === group ' + error.message);
       }
     }
   };

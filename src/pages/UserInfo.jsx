@@ -7,7 +7,6 @@ import { nanoid } from 'nanoid';
 const UserInfo = () => {
   const navigate = useNavigate();
   const { user, error, signInUser } = useAuthContext();
-  console.log(user);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -33,10 +32,10 @@ const UserInfo = () => {
       if (!error) {
         navigate('/');
       } else {
-        console.log(error);
+        console.log('Error in userinfo ' + error);
       }
     } catch (err) {
-      console.log(err);
+      console.log('Error in userinfo ' + err.message);
     }
   };
 
@@ -96,7 +95,7 @@ const UserInfo = () => {
             type='file'
             id='file'
             name='file'
-            required
+            // required
           />
         </div>
         <div className=''>
