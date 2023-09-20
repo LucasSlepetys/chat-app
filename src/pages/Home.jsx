@@ -4,7 +4,7 @@ import { useAuthContext } from '../context/AuthContext';
 import { FaArrowCircleRight } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import RoomsPopUpDisplay from '../components/RoomsPopUpDisplay';
-import { doc, onSnapshot } from 'firebase/firestore';
+import { doc, getDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase/FirebaseConfig';
 
 const Home = () => {
@@ -29,13 +29,13 @@ const Home = () => {
     const data = Object.fromEntries(formData);
 
     const roomDoc = doc(db, 'rooms', data.roomID);
-    const docSnapshot = onSnapshot(roomDoc, async (snapshot) => {
-      if (snapshot.exists()) {
-        const roomID = data.roomID;
-        await joinPrivateRoom()(roomID);
-        navigate(`room/${roomID}`);
-      }
-    });
+    const snapshot = await getDoc(roomDoc);
+
+    if (snapshot.exists()) {
+      const roomID = data.roomID;
+      await joinPrivateRoom()(roomID);
+      navigate(`room/${roomID}`);
+    }
   };
 
   const createPrivateRoom = async () => {
