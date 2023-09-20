@@ -58,6 +58,11 @@ const Room = () => {
   }, []);
 
   const handleSubmit = async () => {
+    if (
+      messageRef.current.value.trim() === '' ||
+      messageRef.current.value.trim() === ' '
+    )
+      return;
     try {
       const roomDocRef = doc(db, 'rooms', roomID);
       //getting length of array
