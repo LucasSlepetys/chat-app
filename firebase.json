@@ -4,6 +4,7 @@
     "indexes": "firestore.indexes.json"
   },
   "hosting": {
+    "site": "messy-chat-app",
     "public": "dist",
     "ignore": [
       "firebase.json",
