@@ -37,17 +37,24 @@ export const loader = async ({ params }) => {
 
 const Room = () => {
   const { roomID } = useLoaderData();
-  const roomName = 'Room Name';
   const [messages, setMessages] = useState([]);
   const messageRef = useRef(null);
   const { user } = useAuthContext();
 
-  useEffect(() => {
+  const getRoomInfoFromFirebase = async () => {
     const roomDocRef = doc(db, 'rooms', roomID);
-    onSnapshot(roomDocRef, (snapshot) => {
-      const messages = snapshot.data().messages;
-      setMessages(messages);
+    onSnapshot(roomDocRef, async (snapshot) => {
+      try {
+        const messages = await snapshot.data().messages;
+        setMessages(messages);
+      } catch (error) {
+        console.log('Error in room.jsx ' + error.message);
+      }
     });
+  };
+
+  useEffect(() => {
+    getRoomInfoFromFirebase();
   }, []);
 
   const handleSubmit = async () => {
@@ -111,7 +118,7 @@ const Room = () => {
   return (
     <div className='bg-sky-950'>
       <div className='relative h-screen overflow-y-scroll no-scrollbar no-scrollbar::-webkit-scrollbar'>
-        <NavBar roomName={roomName} roomID={roomID} />
+        <NavBar roomID={roomID} />
         <div className='mb-16 py-10'>
           <DragDropContext onDragEnd={handleDrag}>
             <Droppable droppableId='ROOT' type='group'>

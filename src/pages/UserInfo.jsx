@@ -15,16 +15,19 @@ const UserInfo = () => {
     const data = Object.fromEntries(formData);
 
     try {
-      const imageID = data.file.name + nanoid();
-      const imageRef = ref(storage, `usersImgs/${imageID}`);
+      //if user doesn't select an img the anonymous img will be used
+      const imageID = data.file.name ? data.file.name + nanoid() : null;
 
-      const res = await uploadBytes(imageRef, data.file);
+      if (imageID) {
+        const imageRef = ref(storage, `usersImgs/${imageID}`);
+        const res = await uploadBytes(imageRef, data.file);
+      }
 
       const userInfo = {
         name: data.name,
         email: data.email,
         uid: user.uid,
-        photoID: imageID,
+        photoID: imageID || 'anonymousImg9234028347.jpg',
       };
 
       await signInUser()(userInfo);

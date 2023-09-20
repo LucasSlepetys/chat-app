@@ -26,9 +26,14 @@ const Home = () => {
     const formData = new FormData(e.currentTarget);
     const data = Object.fromEntries(formData);
 
-    const roomID = data.roomID;
-    await joinPrivateRoom()(roomID);
-    navigate(`room/${roomID}`);
+    const roomDoc = doc(db, 'rooms', roomID);
+    onSnapshot(roomDoc, async (snapshot) => {
+      if (snapshot.exists()) {
+        const roomID = data.roomID;
+        await joinPrivateRoom()(roomID);
+        navigate(`room/${roomID}`);
+      }
+    });
   };
 
   const createPrivateRoom = async () => {

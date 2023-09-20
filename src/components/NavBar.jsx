@@ -1,13 +1,25 @@
-import { doc, updateDoc } from 'firebase/firestore';
-import React, { useRef } from 'react';
+import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
+import React, { useEffect, useRef } from 'react';
 import { FaArrowAltCircleLeft } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { db } from '../firebase/FirebaseConfig';
 
-export function NavBar({ roomName, roomID }) {
+export function NavBar({ roomID }) {
   const navigate = useNavigate();
   const privateRoomNameRef = useRef(null);
   const isPrivate = roomID !== 'c15Gg1C7BqnHls37RsXI' ? true : false;
+
+  useEffect(() => {
+    const roomDocRef = doc(db, 'rooms', roomID);
+    onSnapshot(roomDocRef, async (snapshot) => {
+      try {
+        const roomName = await snapshot.data().roomName;
+        privateRoomNameRef.current.value = roomName;
+      } catch (error) {
+        console.log('Error in room.jsx ' + error.message);
+      }
+    });
+  }, []);
 
   const handleChange = async () => {
     const roomDoc = doc(db, 'rooms', roomID);
@@ -32,7 +44,7 @@ export function NavBar({ roomName, roomID }) {
         <input
           type='text'
           className='text-lg tracking-wider bg-transparent w-2/4'
-          defaultValue={roomName}
+          // defaultValue={roomName}
           ref={privateRoomNameRef}
           onMouseLeave={handleChange}
           disabled={!isPrivate}
